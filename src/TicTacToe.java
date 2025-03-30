@@ -10,15 +10,41 @@ public class TicTacToe {
 
     //main class
     public static void main(String[] args) {
-        int tempRow = -1;
-        int tempCol = -1;
-        clearBoard();
-        display();
-        do{
-            tempRow = SafeInput.getRangedInt(in,"Row",0,ROWS)-1;
-            tempCol = SafeInput.getRangedInt(in,"Column",0,COLS)-1;
-        }while(!isValidMove(tempRow,tempCol));
 
+        int tempRow;
+        int tempCol;
+        do {
+            clearBoard();
+
+            while (!(isWin(currentPlayer) || isTie())) {//if noone has won yet, change the player.
+                if (turn > 1)// we always want to start with 'x', this would change it to 'o' if we ran it turn 1.
+                    if (currentPlayer == "o")
+                    {
+                        currentPlayer = "x";
+                    }
+                    else
+                        currentPlayer = "o";
+                display();
+                tempCol = -1;
+                tempRow = -1;
+
+                do {
+                    System.out.print("Turn: "+turn);
+                    tempRow = SafeInput.getRangedInt(in, "Row", 1, ROWS) - 1;
+                    tempCol = SafeInput.getRangedInt(in, "Column", 1, COLS) - 1;
+                } while (!isValidMove(tempRow, tempCol));
+                board[tempCol][tempRow] = currentPlayer;
+                turn++;
+
+                if (turn > 4) {
+                    if (isWin(currentPlayer)) {
+                        display();
+                        System.out.print(currentPlayer + " wins!");
+                    }
+                }
+
+            }
+        }while(SafeInput.getYNConfirm(in,"Play Again?"));
     }
 
     //sets all the board elements to a space
@@ -30,14 +56,14 @@ public class TicTacToe {
             }
         }
         currentPlayer = "x";
-        turn = 0;
+        turn = 1;
     }
 
     //shows the Tic Tac Toe game used as part of the prompt for the users move choice.
     private static void display()
     {
-        for (int r = 0; r < 3; r++) {
-            for (int c = 0; c < 3; c++) {
+        for (int c = 0; c < 3; c++) {
+            for (int r = 0; r < 3; r++) {
                 System.out.print(board[r][c]);
             }
             System.out.println();
@@ -48,8 +74,8 @@ public class TicTacToe {
     private static boolean isValidMove(int row, int col)
     {
         boolean moveValidated = false;
-        if(row>0 & row <= ROWS & col > 0 & col <= COLS// this is already checked with getRangedInt(...)...
-        & board[col][row] == "")
+        if((row>=0 & row < ROWS & col >= 0 & col < COLS)
+        & (board[col][row] == "" || board[col][row] == " "))
             moveValidated = true;
         else
             System.out.println("invalid move!");
@@ -61,6 +87,7 @@ public class TicTacToe {
     private static boolean isWin(String player)
     {
         boolean winFound = false;
+        //we can check if the values match three in a row anywhere, agnostic of which value it is until we find a win.
         if (isColWin(player)||isRowWin(player)||isDiagonalWin(player))
         {
             winFound = true;
@@ -72,9 +99,9 @@ public class TicTacToe {
     private static boolean isColWin(String player)
     {
         boolean winFound = false;
-        if((board[0][0] == player & board[1][0] == player & board[2][0] == player) ||
-                (board[0][1] == player & board[1][1] == player & board[2][1] == player) ||
-                (board[0][2] == player & board[1][2] == player & board[2][2] == player)
+        if(     (board[0][0].equals(player) & board[1][0].equals(player) & board[2][0].equals(player)) ||
+                (board[0][1].equals(player) & board[1][1].equals(player) & board[2][1].equals(player)) ||
+                (board[0][2].equals(player) & board[1][2].equals(player) & board[2][2].equals(player))
         )
         {
             winFound = true;
@@ -86,9 +113,9 @@ public class TicTacToe {
     private static boolean isRowWin(String player)
     {
         boolean winFound = false;
-        if((board[0][0] == player & board[0][1] == player & board[0][2] == player) ||
-                (board[1][0] == player & board[1][1] == player & board[1][2] == player) ||
-                (board[2][0] == player & board[2][1] == player & board[2][2] == player)
+        if(     (board[0][0].equals(player) & board[0][1].equals(player) & board[0][2].equals(player)) ||
+                (board[1][0].equals(player) & board[1][1].equals(player) & board[1][2].equals(player)) ||
+                (board[2][0].equals(player) & board[2][1].equals(player) & board[2][2].equals(player))
         )
         {
             winFound = true;
@@ -100,8 +127,8 @@ public class TicTacToe {
     private static boolean isDiagonalWin(String player)
     {
         boolean winFound = false;
-        if((board[0][0] == player & board[1][1] == player & board[2][2] == player) ||
-                (board[0][2] == player & board[1][1] == player & board[2][0] == player)
+        if(     (board[0][0].equals(player) & board[1][1].equals(player) & board[2][2].equals(player)) ||
+                (board[0][2].equals(player) & board[1][1].equals(player) & board[2][0].equals(player))
         )
         {
             winFound = true;
@@ -114,11 +141,12 @@ public class TicTacToe {
     {
         boolean tieFound = false;
         //if it's the last turn and there were no wins found, it is a tie.
-        if(turn == 9 && !(isDiagonalWin(currentPlayer)||isColWin(currentPlayer)||isRowWin(currentPlayer)))
+        if(turn == 10 && !(isDiagonalWin(currentPlayer)||isColWin(currentPlayer)||isRowWin(currentPlayer)))
         {
             tieFound = true;
+            System.out.print("It's a Tie!");
+
         }
         return tieFound;
     }
-
 }
